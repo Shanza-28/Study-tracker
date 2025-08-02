@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Study Tracker</title>
+  <style>
+    body {
+      margin: 0;
+      background-color: #121212;
+      color: #ffffff;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0;
+    }
+
+    header {
+      text-align: center;
+      width: 100%;
+      padding: 30px 0 10px;
+      font-size: 2.5rem;
+      color: #00e676;
+    }
+
+    .landing {
+      width: 100%;
+      max-width: 800px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .landing button {
+      width: 100%;
+      padding: 20px;
+      font-size: 1.5rem;
+      border: none;
+      background-color: #1e1e1e;
+      color: #ffffff;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+
+    .landing button:hover {
+      background-color: #ccff90; /* Lightest green on hover */
+      color: #000;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    /* Reuse styles from tracker page */
+    .container {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      max-width: 600px;
+      margin: 30px auto;
+      box-shadow: 0 4px 20px rgba(0, 255, 150, 0.1);
+    }
+
+    label {
+      display: block;
+      margin-top: 15px;
+    }
+
+    select, input {
+      width: 100%;
+      padding: 10px;
+      margin-top: 5px;
+      border-radius: 5px;
+      border: none;
+      background-color: #2c2c2c;
+      color: #fff;
+    }
+
+    button.save-btn {
+      margin-top: 20px;
+      padding: 12px;
+      width: 100%;
+      background-color: #00e676;
+      color: #000;
+      font-weight: bold;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+    }
+
+    button.save-btn:hover {
+      background-color: #00c853;
+    }
+
+    #result {
+      margin-top: 20px;
+      padding: 10px;
+      background-color: #2a2a2a;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .charts-container {
+      display: flex;
+      flex-direction: column;
+      gap: 40px;
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+
+    .chart-wrapper {
+      background-color: #1e1e1e;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0, 255, 150, 0.05);
+    }
+
+    .chart-title {
+      text-align: center;
+      color: #00e676;
+      margin-bottom: 10px;
+    }
+
+    canvas {
+      width: 100% !important;
+      height: auto !important;
+    }
+
+
+
+
+
+
+
+.subject-btn {
+  background-color: #1e1e1e;
+  color: #00e676;
+  border: 2px solid #00e676;
+  padding: 12px 18px;
+  border-radius: 6px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: 0.3s;
+  width: 250px;
+}
+
+.subject-btn:hover {
+  background-color: #00e676;
+  color: #000;
+}
+
+.flex-row-cards {
+  display: flex;
+  gap: 20px;
+  justify-content: center;
+  flex-wrap: wrap;
+  margin-bottom: 30px;
+}
+
+.flex-col-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 25px;
+  margin-bottom: 30px;
+}
+
+.card {
+  background-color: #2a2a2a;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 0 12px rgba(0, 255, 150, 0.1);
+  color: #ffffff;
+  flex: 1;
+  min-width: 220px;
+  text-align: center;
+}
+.hidden {
+  display: none !important;
+}
+
+  </style>
+</head>
+<body>
+
+  <header>📚 Study Tracker</header>
+
+  <!-- Landing Section -->
+  <div class="landing" id="landing">
+    <button onclick="showTracker()">Subject Tracker</button> <br> <br>
+    <button onclick="showSubjectReport()">Subject-wise Report</button> <br> <br>
+    <button onclick="showOverallReport()">Overall Report</button>
+
+  </div>
+
+  <!-- Subject Tracker Section -->
+  <div id="tracker" class="hidden">
+ <!-- Subject Buttons -->
+    <div class="container">
+      <label for="subject">Select Subject:</label>
+      <select id="subject">
+        <option value="QM">QM</option>
+        <option value="QW">QW</option>
+        <option value="BWCS">BWCS</option>
+        <option value="Economics">Economics</option>
+        <option value="ITB">ITB</option>
+      </select>
+
+      <label for="yourMarks">Your Marks (out of 100):</label>
+      <input type="number" id="yourMarks" min="0" max="100" />
+
+      <label for="topMarks">Top Performer Marks (out of 100):</label>
+      <input type="number" id="topMarks" min="0" max="100" />
+
+      <button class="save-btn" onclick="saveEntry()">Save Entry</button>
+
+      <div id="result"></div>
+    </div>
+
+    <div class="charts-container" id="charts"></div>
+  </div>
+
+<!-- Subject-wise Report Section -->
+<div id="subjectReport" class="hidden container">
+  <h2 id="subjectMainHeading" style="text-align: center; color: #00e676;">📊 Subject-wise Report</h2>
+  <!-- Subject Buttons -->
+  <div id="subjectButtons" style="display: flex; flex-direction: column; align-items: center; gap: 15px; margin-bottom: 30px;">
+    <button class="subject-btn" onclick="loadSubjectReport('QM')">QM</button>
+    <button class="subject-btn" onclick="loadSubjectReport('QW')">QW</button>
+    <button class="subject-btn" onclick="loadSubjectReport('BWCS')">BWCS</button>
+    <button class="subject-btn" onclick="loadSubjectReport('Economics')">Economics</button>
+    <button class="subject-btn" onclick="loadSubjectReport('ITB')">ITB</button>
+  </div>
+
+  <!-- Back Button -->
+  <div id="backToList" class="hidden" style="text-align: center; margin-bottom: 20px;">
+    <button class="subject-btn" onclick="goBackToSubjectList()">← Back to Subject List</button>
+  </div>
+
+  <!-- Subject Content Area -->
+  <div id="subjectReportContent"></div>
+</div>
+
+<!-- Place this where you want the Overall Report to appear -->
+<div id="overallReportSection" class="hidden"  style="margin: 40px auto; max-width: 900px;">
+  <h2 style="color: #00e676; text-align: center;">Overall Report</h2>
+
+  <div style="display: flex; gap: 20px; justify-content: center; margin: 20px 0;">
+    <div style="flex: 1; background: #1e1e1e; padding: 20px; border-radius: 10px; text-align: center;">
+      <h3>Total Marks</h3>
+      <p id="overallTotalMarks" style="font-size: 2rem; margin: 10px 0; color: #fff;">-</p>
+    </div>
+    <div style="flex: 1; background: #1e1e1e; padding: 20px; border-radius: 10px; text-align: center;">
+      <h3>Total Percentage</h3>
+      <p id="overallPercentage" style="font-size: 2rem; margin: 10px 0; color: #fff;">-</p>
+    </div>
+  </div>
+
+  <div style="display: flex; gap: 40px; flex-wrap: wrap; justify-content: center;">
+    <div style="flex: 1 1 400px; background: #1e1e1e; padding: 20px; border-radius: 10px;">
+      <h3 style="color: #00e676; text-align: center;">Total Marks by Subject</h3>
+      <canvas id="overallTotalChart"></canvas>
+    </div>
+    <div style="flex: 1 1 400px; background: #1e1e1e; padding: 20px; border-radius: 10px;">
+      <h3 style="color: #00e676; text-align: center;">Average % by Subject</h3>
+      <canvas id="overallAverageChart"></canvas>
+    </div>
+  </div>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+  <!-- Chart.js -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Script -->
+  <script>
+    const subjects = ["QM", "QW", "BWCS", "Economics", "ITB"];
+    let charts = {};
+
+    function showTracker() {
+      document.getElementById('landing').classList.add('hidden');
+      document.getElementById('tracker').classList.remove('hidden');
+      updateSummary(getSavedData());
+      updateAllCharts(getSavedData());
+    }
+
+    function getSavedData() {
+      return JSON.parse(localStorage.getItem('subjectHistory')) || {};
+    }
+
+    function saveEntry() {
+      const subject = document.getElementById('subject').value;
+      const yourMark = parseFloat(document.getElementById('yourMarks').value);
+      const topMark = parseFloat(document.getElementById('topMarks').value);
+
+      if (
+        isNaN(yourMark) || yourMark < 0 || yourMark > 100 ||
+        isNaN(topMark) || topMark < 0 || topMark > 100
+      ) {
+        document.getElementById('result').innerHTML =
+          "<p style='color: #ff5252;'>Please enter valid marks (0–100).</p>";
+        return;
+      }
+
+      const data = getSavedData();
+      if (!data[subject]) {
+        data[subject] = { yourMarks: [], topMarks: [] };
+      }
+
+      data[subject].yourMarks.push(yourMark);
+      data[subject].topMarks.push(topMark);
+      localStorage.setItem('subjectHistory', JSON.stringify(data));
+
+      updateSummary(data);
+      updateAllCharts(data);
+    }
+
+    function updateSummary(data) {
+      const allMarks = [];
+      Object.values(data).forEach(entry => {
+        allMarks.push(...entry.yourMarks);
+      });
+
+      if (allMarks.length === 0) return;
+
+      const avg = (
+        allMarks.reduce((sum, val) => sum + val, 0) / allMarks.length
+      ).toFixed(2);
+
+      const allPerfect = Object.values(data).every(entry =>
+        entry.yourMarks.every((mark, i) => mark === entry.topMarks[i])
+      );
+
+      let grade = '';
+      let note = '';
+
+      if (avg >= 99 && allPerfect) {
+        grade = 'Outstanding - Reached Your Full Potential!';
+        note = '🔥 All marks match top performer!';
+      } else if (avg >= 95) {
+        grade = 'Outstanding';
+      } else if (avg >= 75) {
+        grade = 'Good';
+      } else {
+        grade = 'Bad';
+      }
+
+      document.getElementById('result').innerHTML = `
+        <h3>Overall Avg: ${avg}%</h3>
+        <h4>Grade: ${grade}</h4>
+        ${note ? `<p style="color: #00e676;">${note}</p>` : ''}
+      `;
+    }
+
+    function updateAllCharts(data) {
+      const chartContainer = document.getElementById('charts');
+      chartContainer.innerHTML = '';
+
+      subjects.forEach(subject => {
+        const subjectData = data[subject];
+        if (!subjectData || subjectData.yourMarks.length === 0) return;
+
+        const wrapper = document.createElement('div');
+        wrapper.className = 'chart-wrapper';
+
+        const title = document.createElement('div');
+        title.className = 'chart-title';
+        title.textContent = `${subject} Performance`;
+
+        const canvas = document.createElement('canvas');
+        const labels = subjectData.yourMarks.map((_, i) => `Test ${i + 1}`);
+
+        wrapper.appendChild(title);
+        wrapper.appendChild(canvas);
+        chartContainer.appendChild(wrapper);
+
+        if (charts[subject]) charts[subject].destroy();
+
+        charts[subject] = new Chart(canvas.getContext('2d'), {
+          type: 'line',
+          data: {
+            labels,
+            datasets: [
+              {
+                label: 'You',
+                data: subjectData.yourMarks,
+                borderColor: '#00e676',
+                backgroundColor: '#00e67644',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
+              },
+              {
+                label: 'Top Performer',
+                data: subjectData.topMarks,
+                borderColor: '#f44336',
+                backgroundColor: '#f4433622',
+                tension: 0.3,
+                fill: true,
+                pointRadius: 4
+              }
+            ]
+          },
+          options: {
+            plugins: {
+              legend: { labels: { color: '#ccc' } }
+            },
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 105,
+                ticks: { color: '#ccc' },
+                grid: { color: '#333' }
+              },
+              x: {
+                ticks: { color: '#ccc' },
+                grid: { color: '#333' }
+              }
+            }
+          }
+        });
+      });
+    }
+
+function showSubjectReport() {
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('tracker').classList.add('hidden');
+  document.getElementById('subjectReport').classList.remove('hidden');
+  document.getElementById('subjectButtons').classList.remove('hidden');
+  document.getElementById('backToList').classList.add('hidden');
+  document.getElementById('subjectReportContent').innerHTML = '';
+  document.getElementById('subjectMainHeading').textContent = '📊 Subject-wise Report';
+}
+
+function goBackToSubjectList() {
+  document.getElementById('subjectButtons').classList.remove('hidden');
+  document.getElementById('backToList').classList.add('hidden');
+  document.getElementById('subjectMainHeading').textContent = '📊 Subject-wise Report';
+  document.getElementById('subjectReportContent').innerHTML = '';
+}
+
+const subjectCharts = {};
+
+function loadSubjectReport(subject) {
+  const data = getSavedData();
+  const entry = data[subject];
+
+  const container = document.getElementById('subjectReportContent');
+  container.innerHTML = '';
+
+  // Update main heading
+  document.getElementById('subjectMainHeading').textContent = `${subject} Report`;
+
+  // Toggle visibility
+  document.getElementById('subjectButtons').classList.add('hidden');
+  document.getElementById('backToList').classList.remove('hidden');
+
+  if (!entry || !entry.yourMarks || entry.yourMarks.length === 0) {
+    container.innerHTML = `<p style="color: #ff5252;">No data found for ${subject}.</p>`;
+    return;
+  }
+
+  const total = entry.yourMarks.reduce((sum, mark) => sum + mark, 0);
+  const average = (total / entry.yourMarks.length).toFixed(2);
+  const totalPossible = entry.yourMarks.length * 100;
+  const percentage = ((total / totalPossible) * 100).toFixed(2);
+
+  // Horizontal Cards: Total + Percentage
+  const rowCards = document.createElement('div');
+  rowCards.className = 'flex-row-cards';
+
+  const totalCard = document.createElement('div');
+  totalCard.className = 'card';
+  totalCard.innerHTML = `<h4>Total Marks</h4><p>${total} / ${totalPossible}</p>`;
+
+  const percentCard = document.createElement('div');
+  percentCard.className = 'card';
+  percentCard.innerHTML = `<h4>Percentage</h4><p>${percentage}%</p>`;
+
+  rowCards.appendChild(totalCard);
+  rowCards.appendChild(percentCard);
+  container.appendChild(rowCards);
+
+  // Vertical Cards: Bar + Line Chart
+  const colCards = document.createElement('div');
+  colCards.className = 'flex-col-cards';
+
+  const barCanvas = document.createElement('canvas');
+  const lineCanvas = document.createElement('canvas');
+
+  const barCard = document.createElement('div');
+  barCard.className = 'card';
+  barCard.appendChild(barCanvas);
+
+  const lineCard = document.createElement('div');
+  lineCard.className = 'card';
+  lineCard.appendChild(lineCanvas);
+
+  colCards.appendChild(barCard);
+  colCards.appendChild(lineCard);
+
+  container.appendChild(colCards);
+
+  // Destroy old charts
+  if (subjectCharts[`${subject}_bar`]) subjectCharts[`${subject}_bar`].destroy();
+  if (subjectCharts[`${subject}_line`]) subjectCharts[`${subject}_line`].destroy();
+
+  // Bar chart
+  subjectCharts[`${subject}_bar`] = new Chart(barCanvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels: entry.yourMarks.map((_, i) => `Test ${i + 1}`),
+      datasets: [{
+        label: 'Your Marks',
+        data: entry.yourMarks,
+        backgroundColor: '#00e676'
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#ccc' } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        },
+        x: {
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        }
+      }
+    }
+  });
+
+  // Line chart
+  subjectCharts[`${subject}_line`] = new Chart(lineCanvas.getContext('2d'), {
+    type: 'line',
+    data: {
+      labels: entry.yourMarks.map((_, i) => `Test ${i + 1}`),
+      datasets: [{
+        label: 'Progress',
+        data: entry.yourMarks,
+        borderColor: '#00e676',
+        backgroundColor: '#00e67644',
+        fill: true,
+        tension: 0.3,
+        pointRadius: 4
+      }]
+    },
+    options: {
+      plugins: {
+        legend: { labels: { color: '#ccc' } }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        },
+        x: {
+          ticks: { color: '#ccc' },
+          grid: { color: '#333' }
+        }
+      }
+    }
+  });
+}
+
+
+
+
+
+
+
+
+
+
+
+
+let overallCharts = {};
+
+// Helper to get saved subject data
+function getSavedData() {
+  return JSON.parse(localStorage.getItem('subjectHistory')) || {};
+}
+
+function showOverallReport() {
+  // Hide other sections
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('tracker').classList.add('hidden');
+  document.getElementById('subjectReport').classList.add('hidden');
+
+  // Show this section
+  document.getElementById('overallReportSection').classList.remove('hidden');
+
+  // Now continue with calculations...
+  const data = getSavedData();
+  let grandTotal = 0, grandMax = 0;
+  const totalBySubject = [], avgBySubject = [];
+
+  subjects.forEach(subj => {
+    const entry = data[subj];
+    if (!entry || !entry.yourMarks || entry.yourMarks.length === 0) {
+      totalBySubject.push(0);
+      avgBySubject.push(0);
+      return;
+    }
+    const sum = entry.yourMarks.reduce((a, b) => a + b, 0);
+    const maxPossible = entry.yourMarks.length * 100;
+    const avgPct = (sum / maxPossible) * 100;
+
+    totalBySubject.push(sum);
+    avgBySubject.push(+avgPct.toFixed(2));
+    grandTotal += sum;
+    grandMax += maxPossible;
+  });
+
+  const overallPct = grandMax > 0 ? ((grandTotal / grandMax) * 100).toFixed(2) : 0;
+  document.getElementById('overallTotalMarks').textContent = `${grandTotal} / ${grandMax}`;
+  document.getElementById('overallPercentage').textContent = `${overallPct}%`;
+
+  // Charts
+  if (overallCharts.total) overallCharts.total.destroy();
+  overallCharts.total = new Chart(
+    document.getElementById('overallTotalChart').getContext('2d'),
+    {
+      type: 'bar',
+      data: { labels: subjects, datasets: [{ label: 'Total Marks', data: totalBySubject, backgroundColor: '#00e676' }] },
+      options: { scales: { y: { beginAtZero: true, ticks: { color: '#ccc' }, grid: { color: '#333' } }, x: { ticks: { color: '#ccc' }, grid: { color: '#333' } } }, plugins: { legend: { labels: { color: '#ccc' } } } }
+    }
+  );
+
+  if (overallCharts.avg) overallCharts.avg.destroy();
+  overallCharts.avg = new Chart(
+    document.getElementById('overallAverageChart').getContext('2d'),
+    {
+      type: 'line',
+      data: { labels: subjects, datasets: [{ label: 'Average %', data: avgBySubject, borderColor: '#00e676', backgroundColor: '#00e67644', fill: true, tension: 0.3, pointRadius: 5 }] },
+      options: { scales: { y: { beginAtZero: true, max: 100, ticks: { color: '#ccc' }, grid: { color: '#333' } }, x: { ticks: { color: '#ccc' }, grid: { color: '#333' } } }, plugins: { legend: { labels: { color: '#ccc' } } } }
+    }
+  );
+}
+
+// Example: bind to button or call when needed:
+document.getElementById('overallReportBtn')?.addEventListener('click', showOverallReport);
+
+// Optionally call on load to render immediately
+// showOverallReport();
+
+</script>
+</body>
+</html>
+
